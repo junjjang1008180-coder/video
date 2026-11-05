@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>배속 플레이어</title>
+  <meta name="description" content="동영상·음원 파일을 원하는 배속으로 재생하는 앱">
+  <meta name="theme-color" content="#14161c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="배속 플레이어">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="icons/icon.svg" alt="" width="28" height="28">
+        <span>배속 플레이어</span>
+      </div>
+      <div class="topbar-actions">
+        <button id="installBtn" class="btn ghost" hidden>앱 설치</button>
+        <button id="helpBtn" class="btn ghost icon" aria-label="단축키 도움말" title="단축키">?</button>
+        <label class="btn primary">
+          <input id="fileInput" type="file" accept="video/*,audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.mp4,.mov,.webm,.mkv,.m4v" multiple hidden>
+          파일 열기
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <section id="stage" class="stage empty">
+        <video id="media" playsinline preload="metadata"></video>
+
+        <div id="audioArt" class="audio-art" hidden>
+          <div class="disc"><span></span></div>
+          <div id="audioTitle" class="audio-title"></div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon">▶</div>
+          <p class="empty-title">동영상이나 음원 파일을 열어 주세요</p>
+          <p class="empty-sub">파일을 여기로 끌어다 놓아도 됩니다. 파일은 기기 안에서만 재생되고 어디에도 업로드되지 않습니다.</p>
+          <label class="btn primary lg">
+            <input id="fileInput2" type="file" accept="video/*,audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.mp4,.mov,.webm,.mkv,.m4v" multiple hidden>
+            파일 선택
+          </label>
+        </div>
+
+        <div id="speedBadge" class="speed-badge" aria-hidden="true"></div>
+      </section>
+
+      <section class="controls" aria-label="재생 컨트롤">
+        <div class="seek-row">
+          <span id="curTime" class="time">0:00</span>
+          <div class="seek-wrap">
+            <div id="abRange" class="ab-range" hidden></div>
+            <input id="seek" type="range" min="0" max="1000" step="1" value="0" aria-label="재생 위치" disabled>
+          </div>
+          <span id="durTime" class="time">0:00</span>
+        </div>
+
+        <div class="transport">
+          <button id="prevBtn" class="btn round" aria-label="이전 파일" title="이전 파일">⏮</button>
+          <button id="back10" class="btn round" aria-label="10초 뒤로" title="10초 뒤로 (←)"><span class="skip">−10</span></button>
+          <button id="playBtn" class="btn round play" aria-label="재생" title="재생/일시정지 (Space)">
+            <svg id="playIcon" viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            <svg id="pauseIcon" viewBox="0 0 24 24" width="30" height="30" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor"/></svg>
+          </button>
+          <button id="fwd10" class="btn round" aria-label="10초 앞으로" title="10초 앞으로 (→)"><span class="skip">+10</span></button>
+          <button id="nextBtn" class="btn round" aria-label="다음 파일" title="다음 파일">⏭</button>
+        </div>
+
+        <div class="speed-card">
+          <div class="speed-head">
+            <span class="label">재생 속도</span>
+            <div class="speed-value">
+              <button id="slower" class="btn mini" aria-label="0.05배 느리게" title="느리게 (S)">−</button>
+              <output id="speedOut">1.00×</output>
+              <button id="faster" class="btn mini" aria-label="0.05배 빠르게" title="빠르게 (D)">+</button>
+            </div>
+          </div>
+          <input id="speedRange" type="range" min="0.25" max="4" step="0.05" value="1" aria-label="재생 속도">
+          <div id="presets" class="presets" role="group" aria-label="속도 프리셋"></div>
+          <div class="speed-foot">
+            <label class="switch">
+              <input id="pitchToggle" type="checkbox" checked>
+              <span class="track"><span class="thumb"></span></span>
+              <span>음정 유지 (목소리 변조 방지)</span>
+            </label>
+            <span id="remain" class="remain"></span>
+          </div>
+        </div>
+
+        <div class="extras">
+          <div class="group">
+            <button id="aBtn" class="btn chip" title="구간 반복 시작점">A 지점</button>
+            <button id="bBtn" class="btn chip" title="구간 반복 끝점">B 지점</button>
+            <button id="abClear" class="btn chip" title="구간 반복 해제" hidden>해제</button>
+          </div>
+          <div class="group">
+            <button id="loopBtn" class="btn chip" aria-pressed="false" title="한 파일 반복">🔁 반복</button>
+            <label class="volume" title="볼륨">
+              <span id="muteBtn" role="button" tabindex="0" aria-label="음소거">🔊</span>
+              <input id="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="볼륨">
+            </label>
+            <button id="fsBtn" class="btn chip" title="전체 화면 (F)">⛶ 전체화면</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="playlist-wrap">
+        <div class="playlist-head">
+          <h2>재생 목록</h2>
+          <button id="clearList" class="btn ghost sm" hidden>모두 지우기</button>
+        </div>
+        <ol id="playlist" class="playlist"></ol>
+        <p id="playlistEmpty" class="playlist-empty">아직 열린 파일이 없습니다.</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="dropOverlay" class="drop-overlay" hidden><div>여기에 놓으면 재생 목록에 추가됩니다</div></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="helpDialog" class="help">
+    <h3>키보드 단축키</h3>
+    <table>
+      <tr><td><kbd>Space</kbd> / <kbd>K</kbd></td><td>재생 / 일시정지</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>5초 뒤로 / 앞으로</td></tr>
+      <tr><td><kbd>J</kbd> <kbd>L</kbd></td><td>10초 뒤로 / 앞으로</td></tr>
+      <tr><td><kbd>S</kbd> <kbd>D</kbd></td><td>0.1배 느리게 / 빠르게</td></tr>
+      <tr><td><kbd>R</kbd></td><td>1배속으로 / 직전 배속으로 전환</td></tr>
+      <tr><td><kbd>1</kbd>~<kbd>9</kbd></td><td>속도 프리셋 선택</td></tr>
+      <tr><td><kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd></td><td>구간 반복 A / B / 해제</td></tr>
+      <tr><td><kbd>↑</kbd> <kbd>↓</kbd> / <kbd>M</kbd></td><td>볼륨 / 음소거</td></tr>
+      <tr><td><kbd>F</kbd></td><td>전체 화면</td></tr>
+      <tr><td><kbd>N</kbd> <kbd>P</kbd></td><td>다음 / 이전 파일</td></tr>
+    </table>
+    <form method="dialog"><button class="btn primary">닫기</button></form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

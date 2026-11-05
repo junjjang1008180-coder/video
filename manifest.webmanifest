@@ -1,0 +1,27 @@
+{
+  "name": "배속 플레이어",
+  "short_name": "배속플레이어",
+  "description": "동영상·음원 파일을 원하는 배속으로 재생하는 앱",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1116",
+  "theme_color": "#14161c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "video/*": [".mp4", ".m4v", ".mov", ".webm", ".mkv"],
+        "audio/*": [".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg", ".opus"]
+      }
+    }
+  ]
+}
